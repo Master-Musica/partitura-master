@@ -98,10 +98,10 @@
         <span style="border-left: 1px solid #c3c4c7; height: 24px; margin: 0 5px;"></span>
 
         <button class="btn-acao" data-acao=" | " style="background: #e7f5fe; border: 1px solid #007cba; color: #007cba; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Barra (|)</button>
-        <button class="btn-acao" data-acao=" \n" style="background: #f0f6fc; border: 1px solid #1d2327; padding: 6px 12px; border-radius: 4px; cursor: pointer;">↵ Pular Linha</button>
+        <button class="btn-acao" data-acao=" \n" style="background: #e7f5fe; border: 1px solid #1d2327; padding: 6px 12px; border-radius: 4px; cursor: pointer;">↵ Pular Linha</button>
         <button id="btn-nova-pauta" style="background: #d4edda; border: 1px solid #28a745; color: #155724; padding: 6px 12px; border-radius: 4px; cursor: pointer;">➕ Nova Pauta</button>
 
-        <button id="btn-desfazer" style="background: #fff; border: 1px solid #8c8f94; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: auto;">⤺ Desfazer</button>
+        <button id="btn-desfazer" style="background: #fcf0f1; border: 1px solid #8c8f94; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: auto;">⤺ Desfazer</button>
         <button id="btn-limpar" style="background: #fcf0f1; border: 1px solid #d63638; color: #d63638; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Limpar</button>
     </div>
 
