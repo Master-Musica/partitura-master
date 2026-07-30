@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     var visualContainer = "partitura-visual";
     var historico = [abcTextArea.value];
+    var maxHistorico = 30; // 5. Limite do histórico para não estourar a memória
 
     var synthControl = new ABCJS.synth.SynthController();
     synthControl.load("#audio-player", null, { displayLoop: true, displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true });
@@ -18,19 +19,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }).catch(console.warn);
     }
 
+    // Função auxiliar para guardar histórico com limite
+    function salvarHistorico() {
+        historico.push(abcTextArea.value);
+        if (historico.length > maxHistorico) {
+            historico.shift(); // Remove o estado mais antigo da memória
+        }
+    }
+
+    // 2. Inserção no local correto do cursor
+    function inserirNoCursor(texto) {
+        salvarHistorico();
+        var inicio = abcTextArea.selectionStart;
+        var fim = abcTextArea.selectionEnd;
+        var textoAntes = abcTextArea.value.substring(0, inicio);
+        var textoDepois = abcTextArea.value.substring(fim, abcTextArea.value.length);
+        
+        abcTextArea.value = textoAntes + texto + textoDepois;
+        
+        // Move o cursor para logo após o texto inserido
+        abcTextArea.selectionStart = abcTextArea.selectionEnd = inicio + texto.length;
+        abcTextArea.focus();
+    }
+
     // --- SELETOR DE TOM ---
     document.getElementById('seletor-tom').addEventListener('change', function() {
         var novoTom = this.value;
-        historico.push(abcTextArea.value);
-        abcTextArea.value = abcTextArea.value.replace(/K:\s*[A-Za-z#b]+/g, "K: " + novoTom);
+        salvarHistorico();
+        // 3. Regex seguro sem a flag /g (apenas afeta o primeiro cabeçalho)
+        abcTextArea.value = abcTextArea.value.replace(/K:\s*[A-Za-z#b]+/, "K: " + novoTom);
         renderizarPartitura();
     });
 
     // --- SELETOR DE COMPASSO ---
     document.getElementById('seletor-compasso').addEventListener('change', function() {
         var novoCompasso = this.value;
-        historico.push(abcTextArea.value);
-        abcTextArea.value = abcTextArea.value.replace(/M:\s*[^\n]+/g, "M: " + novoCompasso);
+        salvarHistorico();
+        // 3. Regex seguro sem a flag /g
+        abcTextArea.value = abcTextArea.value.replace(/M:\s*[^\n]+/, "M: " + novoCompasso);
         renderizarPartitura();
     });
 
@@ -50,6 +76,16 @@ document.addEventListener('DOMContentLoaded', function() {
     gerenciarModificadores('.btn-acidente', 'acidente');
     gerenciarModificadores('.btn-oitava', 'oitava');
 
+    // 4. Resetar a interface visual
+    function resetarModificadoresVisuais() {
+        estadoAtual = { duracao: "", acidente: "", oitava: "" };
+        document.querySelectorAll('.btn-duracao, .btn-acidente, .btn-oitava').forEach(b => b.classList.remove('active'));
+        // Reativa os botões padrão
+        document.querySelector('.btn-duracao[data-val=""]').classList.add('active');
+        document.querySelector('.btn-acidente[data-val=""]').classList.add('active');
+        document.querySelector('.btn-oitava[data-val=""]').classList.add('active');
+    }
+
     // --- INSERIR NOTAS ---
     document.querySelectorAll('.btn-nota').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -64,8 +100,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 stringFinal = dinamicaVal + estadoAtual.acidente + notaBase + estadoAtual.oitava + estadoAtual.duracao;
             }
 
-            historico.push(abcTextArea.value);
-            abcTextArea.value += " " + stringFinal;
+            // Usa a nova função de inserção precisa
+            inserirNoCursor(" " + stringFinal);
 
             if (dinamicaSelect && dinamicaVal !== "") dinamicaSelect.value = "";
             renderizarPartitura();
@@ -75,24 +111,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- BARRAS E QUEBRAS ---
     document.querySelectorAll('.btn-acao').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            historico.push(abcTextArea.value);
-            abcTextArea.value += this.getAttribute('data-acao');
+            inserirNoCursor(this.getAttribute('data-acao'));
             renderizarPartitura();
         });
     });
 
     // --- NOVA PAUTA ---
     document.getElementById('btn-nova-pauta').addEventListener('click', function() {
-        historico.push(abcTextArea.value);
+        salvarHistorico();
+        
+        // 6. Lógica de Pauta Segura: Encontra a maior voz existente e soma 1
         var matches = abcTextArea.value.match(/V:\s*\d+/g);
-        var proximaVoz = matches ? matches.length + 1 : 2;
-        abcTextArea.value += "\n\nV: " + proximaVoz + "\n";
+        var maiorVoz = 1;
+        if (matches) {
+            matches.forEach(function(m) {
+                var num = parseInt(m.replace("V:", "").trim());
+                if (num > maiorVoz) maiorVoz = num;
+            });
+        }
+        var proximaVoz = maiorVoz + 1;
+        
+        inserirNoCursor("\n\nV: " + proximaVoz + "\n");
         renderizarPartitura();
     });
 
     // --- DESFAZER ---
     document.getElementById('btn-desfazer').addEventListener('click', function() {
-        if(historico.length > 1) {
+        if(historico.length > 0) {
             abcTextArea.value = historico.pop();
             renderizarPartitura();
         }
@@ -100,16 +145,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- LIMPAR ---
     document.getElementById('btn-limpar').addEventListener('click', function() {
-        historico.push(abcTextArea.value);
+        salvarHistorico();
         var tomAtual = document.getElementById('seletor-tom').value;
         var compassoAtual = document.getElementById('seletor-compasso').value;
         abcTextArea.value = "X: 1\nT: Minha Composição\nM: " + compassoAtual + "\nL: 1/4\nQ: 1/4=100\nK: " + tomAtual + "\nV: 1\n";
+        
+        // Aciona a correção visual dos botões
+        resetarModificadoresVisuais();
+        
         renderizarPartitura();
     });
 
+    // 1. O Debounce Corrigido
+    var timerRenderizacao;
     abcTextArea.addEventListener("input", function() {
-        setTimeout(renderizarPartitura, 500);
+        clearTimeout(timerRenderizacao); // Cancela a renderização anterior se continuar a escrever
+        timerRenderizacao = setTimeout(renderizarPartitura, 500); // Aguarda 500ms
     });
 
+    // Primeira renderização ao abrir
     renderizarPartitura();
 });
