@@ -22,17 +22,15 @@
         <div style="display: flex; align-items: center; gap: 8px; flex: 1 1 200px;">
             <span style="font-weight: 600; font-size: 13px; color: #3c434a; white-space: nowrap;">COMPASSO:</span>
             <select id="seletor-compasso" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #8c8f94; font-size: 14px; cursor: pointer; width: 100%;">
-                <optgroup label="Simples">
+                <optgroup label="Fórmula de Compasso">
                     <option value="4/4" selected>4/4 (Quaternário)</option>
-                    <option value="3/4">3/4 (Ternário)</option>
-                    <option value="2/4">2/4 (Binário)</option>
-                    <option value="2/2">2/2 (Alla Breve)</option>
-                    <option value="C">C (Tempo Comum)</option>
-                </optgroup>
-                <optgroup label="Compostos">
-                    <option value="6/8">6/8 (Binário Composto)</option>
-                    <option value="9/8">9/8 (Ternário Composto)</option>
-                    <option value="12/8">12/8 (Quat. Composto)</option>
+                    <option value="3/4">3/4</option>
+                    <option value="2/4">2/4</option>
+                    <option value="2/2">2/2</option>
+                    <option value="C">C</option>             
+                    <option value="6/8">6/8)</option>
+                    <option value="9/8">9/8</option>
+                    <option value="12/8">12/8</option>
                 </optgroup>
             </select>
         </div>
@@ -41,12 +39,12 @@
             <span style="font-weight: 600; font-size: 13px; color: #3c434a; white-space: nowrap;">DINÂMICA:</span>
             <select id="seletor-dinamica" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #8c8f94; font-size: 14px; cursor: pointer; width: 100%;">
                 <option value="" selected>Nenhuma</option>
-                <option value="!pp!">Pianíssimo (pp)</option>
-                <option value="!p!">Piano (p)</option>
-                <option value="!mp!">Mezzo-piano (mp)</option>
-                <option value="!mf!">Mezzo-forte (mf)</option>
-                <option value="!f!">Forte (f)</option>
-                <option value="!ff!">Fortíssimo (ff)</option>
+                <option value="!pp!">pp</option>
+                <option value="!p!">p</option>
+                <option value="!mp!">mp</option>
+                <option value="!mf!">mf</option>
+                <option value="!f!">f</option>
+                <option value="!ff!">ff</option>
             </select>
         </div>
     </div>
